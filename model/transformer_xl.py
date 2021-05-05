@@ -103,6 +103,7 @@ class Transformer_XL(nn.Module):
 
         return output, new_ms
 
+    '''
     def get_pad_mask(self, q_len: int, k_len: int):
         """pad mask 수행 함수
         Args:
@@ -122,6 +123,7 @@ class Transformer_XL(nn.Module):
         mask = k & q
 
         return mask
+    '''
 
     def get_no_peak_mask(self, q_len: int, k_len: int):
         """no peak mask 수행 함수
@@ -150,6 +152,8 @@ class Transformer_XL(nn.Module):
             new_ms (torch.Tensor(n_layer, bs, m_len, d_model)): current memory
         """
 
+        q_len = hs.size(-2)
+
         with torch.no_grad():
             new_ms = []
 
@@ -160,6 +164,6 @@ class Transformer_XL(nn.Module):
             else:
                 for i in range(len(hs)):
                     cat = torch.cat([ms[i], hs[i]], dim=1)
-                    new_ms.append(cat.narrow(1, 1, self.m_len).detach())
+                    new_ms.append(cat.narrow(1, q_len, self.m_len).detach())
 
         return new_ms
