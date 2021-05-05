@@ -10,13 +10,13 @@ from torchtext.legacy.datasets import WikiText103
 from config import *
 
 def batchify(data, bsz):
-    data = TEXT.numericalize([data.examples[0].text])
     nbatch = data.size(0) // bsz
     data = data.narrow(0, 0, nbatch * bsz)
     data = data.view(bsz, -1).contiguous()
     return data.to(device)
 
 if not os.path.exists("./.data/cache.pt"):
+    print('tokenize data...')
     TEXT = Field(tokenize=get_tokenizer("basic_english"),
                 init_token='<sos>',
                 eos_token='<eos>',
@@ -26,10 +26,9 @@ if not os.path.exists("./.data/cache.pt"):
 
     TEXT.build_vocab(train_txt)
 
-    train_data = batchify(train_txt, batch_size)
-    val_data = batchify(val_txt, batch_size)
-    test_data = batchify(test_txt, batch_size)
-
+    train_data = TEXT.numericalize([train_txt.examples[0].text])
+    val_data = TEXT.numericalize([val_txt.examples[0].text])
+    test_data = TEXT.numericalize([test_txt.examples[0].text])
     itos = TEXT.vocab.itos
     stoi = TEXT.vocab.stoi
 
@@ -41,12 +40,14 @@ if not os.path.exists("./.data/cache.pt"):
         "stoi": TEXT.vocab.stoi
     }
 
+
     torch.save(data, "./.data/cache.pt")
 
+print('load data...')
 data = torch.load("./.data/cache.pt")
-train_data = data["train"]
-val_data = data["val"]
-test_data = data["test"]
+train_data = batchify(data["train"], batch_size)
+val_data = batchify(data["val"], batch_size)
+test_data = batchify(data["test"], batch_size)
 itos = data["itos"]
 stoi = data["stoi"]
 vocab_size = len(itos)
