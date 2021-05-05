@@ -66,7 +66,7 @@ def evaluate(model, iterator, loss_fn):
     epoch_loss = 0
     batch_bleu = []
     with torch.no_grad():
-        for batch in tqdm(iterator, desc='step'):
+        for batch in tqdm(iterator, desc='step', total=iter_len):
             src = batch.src
             trg = batch.trg
             output = model(src, trg[:, :-1])
@@ -125,10 +125,14 @@ def run(total_epoch, best_loss):
         f.close()
         """
 
+        """
         print('epoch : {} \t train loss : {:.3f} \t val loss : {:.3f} \t bleu : {:.3f}'.format(epoch + 1,
                                                                                                train_loss,
                                                                                                valid_loss,
                                                                                                bleu))
+        """
+        print('epoch : {} \t train_loss : {:.3f}'.format(epoch + 1,
+                                                         train_loss))
 
 if __name__ == '__main__':
     if not os.path.exists(model_dir):
